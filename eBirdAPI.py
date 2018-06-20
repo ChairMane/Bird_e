@@ -21,7 +21,7 @@ class Bird_e:
         obs = requests.get(final_url_obs)
         observations = obs.json()
         for dict in observations:
-            print(dict["comName"])
+            print(dict['comName'] + ' was found in ' + dict['locName'])
 
     #Grabs recent notabel observations within a local ID. regiona codes accepted:
     #subnational1, subnational2, eBird local ID or country code.
@@ -38,7 +38,7 @@ class Bird_e:
         obs = requests.get(final_url_obs)
         observations = obs.json()
         for dict in observations:
-            print(dict["comName"])
+            print(dict['comName'] + ' was found in ' + dict['locName'])
 
     #Grabs species that were recently observed.
     #speciesCodes are six letters long, and usually use first three letters of first name
@@ -57,15 +57,55 @@ class Bird_e:
         obs = requests.get(final_url_obs)
         observations = obs.json()
         for dict in observations:
-            print(dict["comName"])
+            print(dict['comName'] + ' was found in ' + dict['locName'])
+
+    #Using latitude and longitude, this function grabs recent observations near
+    #the inputted coordinates.
+    def get_recent_nearby_observations(self, lat, lng, dist=None, maxResults=None, back=None):
+
+        eBird_key = config['ebird_token']
+        final_url_obs = 'https://ebird.org/ws2.0/data/obs/geo/recent?lat=' + lat + '&lng=' + lng + '&'
+        if dist:
+            final_url_obs += 'dist=' + dist + '&'
+        if maxResults:
+            final_url_obs += 'maxResults=' + maxResults + '&'
+        if back:
+            final_url_obs += 'back=' + back + '&'
+        final_url_obs += 'key=' + eBird_key
+        print(final_url_obs)
+        obs = requests.get(final_url_obs)
+        observations = obs.json()
+        for dict in observations:
+            print(dict['comName'] + ' was found within ' + dist + 'km of your coordinates.')
+
+    def get_recent_species_nearby_observations(self, speciesCode, lat, lng, dist=None, maxResults=None, back=None):
+
+        eBird_key = config['ebird_token']
+        final_url_obs = 'https://ebird.org/ws2.0/data/obs/geo/recent/' + speciesCode + '?lat=' + lat + '&lng=' + lng + '&'
+        if dist:
+            final_url_obs += 'dist=' + dist + '&'
+        if maxResults:
+            final_url_obs += 'maxResults=' + maxResults + '&'
+        if back:
+            final_url_obs += 'back=' + back + '&'
+        final_url_obs += 'key=' + eBird_key
+        print(final_url_obs)
+        obs = requests.get(final_url_obs)
+        observations = obs.json()
+        for dict in observations:
+            print(dict['comName'] + ' was found within ' + dist + 'km of your coordinates at ' + dict['locName'] + '.')
 
 bird = Bird_e()
 
-regional_code = input("Enter regional code here: ")
+#regional_code = input("Enter regional code here: ")
 speciescode = input("Enter species code: ")
+lat = input("Enter latitude coordinate: ")
+lng = input("Enter longitude coordinate: ")
+dist = input("Enter radius from coordinates: ")
 maxresults = input("Enter max results: ")
 back = input("Enter how far back you want to go: ")
-bird.get_recent_species_observation(regional_code, speciescode, maxresults, back)
-'''bird.get_recent_observation(regional_code, maxresults, back)
-print("Below is recent notable observations: ")
-bird.get_recent_notable_observation(regional_code, maxresults, back)'''
+bird.get_recent_species_nearby_observations(speciescode, lat, lng, dist, maxresults, back)
+#bird.get_recent_species_observation(regional_code, speciescode, maxresults, back)
+#bird.get_recent_observation(regional_code, maxresults, back)
+#print("Below is recent notable observations: ")
+#bird.get_recent_notable_observation(regional_code, maxresults, back)
