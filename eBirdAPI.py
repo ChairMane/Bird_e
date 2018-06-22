@@ -28,7 +28,7 @@ class Bird_e:
         results = ''
         i = 1
         for key in sighting:
-            results += str(i) + ') ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
+            results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
             i += 1
 
         return results
@@ -36,7 +36,7 @@ class Bird_e:
     #Grabs recent notabel observations within a local ID. regiona codes accepted:
     #subnational1, subnational2, eBird local ID or country code.
     def get_recent_notable_observation(self, regional_code, maxResults=None, back=None):
-
+        sighting = {}
         eBird_key = config['ebird_token']
         final_url_obs = 'https://ebird.org/ws2.0/data/obs/' + regional_code + '/recent/notable/?'
         if maxResults:
@@ -44,18 +44,28 @@ class Bird_e:
         if back:
             final_url_obs += 'back=' + back + '&'
         final_url_obs += 'key=' + eBird_key
-        print(final_url_obs)
+
         obs = requests.get(final_url_obs)
         observations = obs.json()
-        for dict in observations:
-            print(dict['comName'] + ' was found in ' + dict['locName'])
+
+        for dictionary in observations:
+            sighting[dictionary['comName']] = dictionary['locName']
+
+        results = ''
+        i = 1
+        for key in sighting:
+            results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
+            i += 1
+
+        return results
+
 
     #Grabs species that were recently observed.
     #speciesCodes are six letters long, and usually use first three letters of first name
     #then first three of second name. If the bird just has one name, it's the first six letters.
     #If a bird has more than two names, then you must make up six letters from those names.
     def get_recent_species_observation(self, regional_code, speciesCode, maxResults=None, back=None):
-
+        sighting = []
         eBird_key = config['ebird_token']
         final_url_obs = 'https://ebird.org/ws2.0/data/obs/' + regional_code + '/recent/' + speciesCode + '?'
         if maxResults:
@@ -63,11 +73,25 @@ class Bird_e:
         if back:
             final_url_obs += 'back=' + back + '&'
         final_url_obs += 'key=' + eBird_key
-        print(final_url_obs)
+
         obs = requests.get(final_url_obs)
         observations = obs.json()
-        for dict in observations:
-            print(dict['comName'] + ' was found in ' + dict['locName'])
+
+        common_name = observations[0]['comName']
+
+        j = 0
+        for dictionary in observations:
+            sighting.insert(j, dictionary['locName'])
+            j+=1
+
+        results = ''
+
+        i = 0
+        for index in sighting:
+            results += str(i+1) + '. ' + common_name + ' seen here: \n' + '     ' + sighting[i] + '\n\n'
+            i += 1
+
+        return results
 
     #Using latitude and longitude, this function grabs recent observations near
     #the inputted coordinates.
@@ -104,3 +128,12 @@ class Bird_e:
         observations = obs.json()
         for dict in observations:
             print(dict['comName'] + ' was found within ' + dist + 'km of your coordinates at ' + dict['locName'] + '.')
+
+
+'''bird = Bird_e()
+
+regional = input("regional: ")
+species = input("species: ")
+max = input("max: ")
+
+bird.get_recent_species_observation(regional, species, max)#'''
