@@ -95,8 +95,8 @@ class Bird_e:
 
     #Using latitude and longitude, this function grabs recent observations near
     #the inputted coordinates.
-    def get_recent_nearby_observations(self, lat, lng, dist=None, maxResults=None, back=None):
-
+    def get_recent_nearby_observation(self, lat, lng, dist=None, maxResults=None, back=None):
+        sighting = {}
         eBird_key = config['ebird_token']
         final_url_obs = 'https://ebird.org/ws2.0/data/obs/geo/recent?lat=' + lat + '&lng=' + lng + '&'
         if dist:
@@ -106,13 +106,23 @@ class Bird_e:
         if back:
             final_url_obs += 'back=' + back + '&'
         final_url_obs += 'key=' + eBird_key
-        print(final_url_obs)
+
         obs = requests.get(final_url_obs)
         observations = obs.json()
-        for dict in observations:
-            print(dict['comName'] + ' was found within ' + dist + 'km of your coordinates.')
 
-    def get_recent_species_nearby_observations(self, speciesCode, lat, lng, dist=None, maxResults=None, back=None):
+        for dictionary in observations:
+            sighting[dictionary['comName']] = dictionary['locName']
+
+        results = ''
+        i = 1
+        for key in sighting:
+            results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
+            i += 1
+
+        return results
+
+
+    def get_recent_species_nearby_observation(self, speciesCode, lat, lng, dist=None, maxResults=None, back=None):
 
         eBird_key = config['ebird_token']
         final_url_obs = 'https://ebird.org/ws2.0/data/obs/geo/recent/' + speciesCode + '?lat=' + lat + '&lng=' + lng + '&'
@@ -129,11 +139,3 @@ class Bird_e:
         for dict in observations:
             print(dict['comName'] + ' was found within ' + dist + 'km of your coordinates at ' + dict['locName'] + '.')
 
-
-'''bird = Bird_e()
-
-regional = input("regional: ")
-species = input("species: ")
-max = input("max: ")
-
-bird.get_recent_species_observation(regional, species, max)#'''
