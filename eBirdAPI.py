@@ -1,5 +1,6 @@
 import requests
 import json
+import geopy.distance
 import time
 from pprint import pprint
 
@@ -122,7 +123,8 @@ class Bird_e:
         return results
 
 
-    def get_recent_species_nearby_observation(self, speciesCode, lat, lng, dist=None, maxResults=None, back=None):
+    def get_species_nearby_observation(self, speciesCode, lat, lng, dist=None, maxResults=None, back=None):
+        sighting = []
 
         eBird_key = config['ebird_token']
         final_url_obs = 'https://ebird.org/ws2.0/data/obs/geo/recent/' + speciesCode + '?lat=' + lat + '&lng=' + lng + '&'
@@ -133,9 +135,123 @@ class Bird_e:
         if back:
             final_url_obs += 'back=' + back + '&'
         final_url_obs += 'key=' + eBird_key
-        print(final_url_obs)
+
         obs = requests.get(final_url_obs)
         observations = obs.json()
-        for dict in observations:
-            print(dict['comName'] + ' was found within ' + dist + 'km of your coordinates at ' + dict['locName'] + '.')
 
+        common_name = observations[0]['comName']
+
+        j = 0
+        for dictionary in observations:
+            sighting.insert(j, dictionary['locName'])
+            j += 1
+
+        results = ''
+
+        i = 0
+        for index in sighting:
+            results += str(i + 1) + '. ' + common_name + ' seen here: \n' + '     ' + sighting[i] + '\n\n'
+            i += 1
+
+        return results
+
+    def get_nearest_species_observation(self, speciesCode, lat, lng, dist=None, maxResults=None, back=None):
+        sighting = []
+
+        eBird_key = config['ebird_token']
+        final_url_obs = 'https://ebird.org/ws2.0/data/nearest/geo/recent/' + speciesCode + '?lat=' + lat + '&lng=' + lng + '&'
+        if dist:
+            final_url_obs += 'dist=' + dist + '&'
+        if maxResults:
+            final_url_obs += 'maxResults=' + maxResults + '&'
+        if back:
+            final_url_obs += 'back=' + back + '&'
+        final_url_obs += 'key=' + eBird_key
+
+        obs = requests.get(final_url_obs)
+        observations = obs.json()
+
+        common_name = observations[0]['comName']
+
+        j = 0
+        for dictionary in observations:
+            sighting.insert(j, '\n' + dictionary['locName'] + '\nDistance: ' + '%.2f' % self.distance(lat, lng, dictionary['lat'], dictionary['lng']) + ' miles')
+            j += 1
+
+        results = ''
+
+        i = 0
+        for index in sighting:
+            results += str(i + 1) + '. ' + common_name + ' seen here:' + sighting[i] + '\n\n'
+            i += 1
+
+        return results
+
+    def get_nearby_notable_observation(self, lat, lng, dist=None, maxResults=None, back=None):
+        sighting = {}
+        eBird_key = config['ebird_token']
+        final_url_obs = 'https://ebird.org/ws2.0/data/obs/geo/recent/notable?lat=' + lat + '&lng=' + lng + '&'
+        if dist:
+            final_url_obs += 'dist=' + dist + '&'
+        if maxResults:
+            final_url_obs += 'maxResults=' + maxResults + '&'
+        if back:
+            final_url_obs += 'back=' + back + '&'
+        final_url_obs += 'key=' + eBird_key
+
+        obs = requests.get(final_url_obs)
+        observations = obs.json()
+
+        for dictionary in observations:
+            sighting[dictionary['comName']] = dictionary['locName']
+
+        results = ''
+        i = 1
+        for key in sighting:
+            results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
+            i += 1
+
+        return results
+
+    def get_historic_observation(self, regionCode, year, month, day, maxResults=None):
+        sighting = {}
+        eBird_key = config['ebird_token']
+        final_url_obs = 'https://ebird.org/ws2.0/data/obs/' + regionCode + '/historic/' + year + '/' + month + '/' + day + '?'
+        if maxResults:
+            final_url_obs += 'maxResults=' + maxResults + '&'
+        final_url_obs += 'key=' + eBird_key
+
+        obs = requests.get(final_url_obs)
+        observations = obs.json()
+
+
+        for dictionary in observations:
+            sighting[dictionary['comName']] = dictionary['locName']
+
+        results = ''
+        i = 1
+        for key in sighting:
+            results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
+            i += 1
+
+        return results
+
+    def distance(self, lat1, lon1, lat2, lon2):
+
+        coords_1 = (lat1, lon1)
+        coords_2 = (lat2, lon2)
+
+        return geopy.distance.vincenty(coords_1, coords_2).miles
+
+
+
+#bird = Bird_e()
+#33.708640
+#-116.268139
+#species = input("speciesCODE: ")
+'''lat = input("LAT: ")
+lon = input("LON: ")
+rad = input("Radius: ")
+max = input("maxResults: ")'''
+
+#print(bird.get_historic_observation('US-CA', '1959', '1', '6', 'mrec', '10'))
