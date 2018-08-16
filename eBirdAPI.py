@@ -29,6 +29,8 @@ class Bird_e:
         results = ''
         i = 1
         for key in sighting:
+            if len(results) > 1800:
+                return results
             results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
             i += 1
 
@@ -55,6 +57,8 @@ class Bird_e:
         results = ''
         i = 1
         for key in sighting:
+            if len(results) > 1800:
+                return results
             results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
             i += 1
 
@@ -89,6 +93,8 @@ class Bird_e:
 
         i = 0
         for index in sighting:
+            if len(results) > 1800:
+                return results
             results += str(i+1) + '. ' + common_name + ' seen here: \n' + '     ' + sighting[i] + '\n\n'
             i += 1
 
@@ -117,6 +123,8 @@ class Bird_e:
         results = ''
         i = 1
         for key in sighting:
+            if len(results) > 1800:
+                return results
             results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
             i += 1
 
@@ -150,6 +158,8 @@ class Bird_e:
 
         i = 0
         for index in sighting:
+            if len(results) > 1800:
+                return results
             results += str(i + 1) + '. ' + common_name + ' seen here: \n' + '     ' + sighting[i] + '\n\n'
             i += 1
 
@@ -182,6 +192,8 @@ class Bird_e:
 
         i = 0
         for index in sighting:
+            if len(results) > 1800:
+                return results
             results += str(i + 1) + '. ' + common_name + ' seen here:' + sighting[i] + '\n\n'
             i += 1
 
@@ -208,6 +220,8 @@ class Bird_e:
         results = ''
         i = 1
         for key in sighting:
+            if len(results) > 1800:
+                return results
             results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
             i += 1
 
@@ -231,8 +245,33 @@ class Bird_e:
         results = ''
         i = 1
         for key in sighting:
+            if len(results) > 1800:
+                return results
             results += str(i) + '. ' + key + ' seen here: \n' + '     ' + sighting[key] + '\n\n'
             i += 1
+
+        return results
+
+    def get_top_100(self, regionCode, year, month, day):
+        sighting = []
+        eBird_key = config['ebird_token']
+        final_url_obs = 'https://ebird.org/ws2.0/product/top100/' + regionCode + '/' + year + '/' + month + '/' + day + '?checklistSort=false&maxResults=100&key=' + eBird_key
+
+        obs = requests.get(final_url_obs)
+        observations = obs.json()
+
+        j = 0
+        for dictionary in observations:
+            sighting.insert(j, str(dictionary['userDisplayName']) + ' - ' + str(dictionary['numSpecies']) + ' species.')
+            j += 1
+
+        results = 'Date: {}/{}/{}:\n'.format(month, day, year)
+        i = 0
+        for index in sighting:
+            if len(results) > 1800:
+                return results
+            results += str(i + 1) + '. ' + sighting[i] + '\n'
+            i+=1
 
         return results
 
@@ -245,13 +284,4 @@ class Bird_e:
 
 
 
-#bird = Bird_e()
-#33.708640
-#-116.268139
-#species = input("speciesCODE: ")
-'''lat = input("LAT: ")
-lon = input("LON: ")
-rad = input("Radius: ")
-max = input("maxResults: ")'''
 
-#print(bird.get_historic_observation('US-CA', '1959', '1', '6', 'mrec', '10'))
