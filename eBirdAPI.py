@@ -275,6 +275,43 @@ class Bird_e:
 
         return results
 
+    def get_stats(self, regionCode, year, month, day):
+
+        eBird_key = config['ebird_token']
+        final_url_obs = 'https://ebird.org/ws2.0/product/stats/' + regionCode + '/' + year + '/' + month + '/' + day + '?&key=' + eBird_key
+
+        obs = requests.get(final_url_obs)
+        observations = obs.json()
+
+        results = 'Number of checklists: ' + str(observations['numChecklists']) + '\nNumber of contributors: ' + str(observations['numContributors']) + '\nNumber of species observed:' + str(observations['numSpecies'])
+
+        return results
+
+
+    def get_adjacent_region(self, regionCode):
+        sighting = []
+        eBird_key = config['ebird_token']
+        final_url_obs = 'https://ebird.org/ws2.0/ref/adjacent/' + regionCode + '?&key=' + eBird_key
+
+        obs = requests.get(final_url_obs)
+        observations = obs.json()
+
+        j = 0
+        for dictionary in observations:
+            sighting.insert(j, 'Region Code: ' + dictionary['code'] + ' / ' + dictionary['name'])
+            j += 1
+
+        results = ''
+        i = 0
+        for index in sighting:
+            if len(results) > 1800:
+                return results
+            results += str(i + 1) + '. ' + sighting[i] + '\n'
+            i+=1
+
+        return results
+
+
     def distance(self, lat1, lon1, lat2, lon2):
 
         coords_1 = (lat1, lon1)
@@ -285,3 +322,6 @@ class Bird_e:
 
 
 
+'''bird = Bird_e()
+
+print(bird.get_adjacent_region('US-CA'))'''
